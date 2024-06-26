@@ -66,18 +66,24 @@ void ligado(){
 
   int pwm = 255;  //(analogRead(pot) / 1023) * 255;
   int cm = ultrasonic.read();
+  delay(100);
+  Serial.println(cm);
   analogWrite(motorH, pwm);
   analogWrite(motorA, 0);
-    // só um if se a gente não ligar o motor no analisaCor()
-    if(cm <= 5){ // definir cm quando a caixa estiver pronta
-      Serial.println(cm);
-      analogWrite(motorH, 0);
-      analogWrite(motorA, 0);
-      analisaCor();
-      delay(1000);
-    }
-  String cor = analisaCor();
-  pneumatica(cor);
+  
+  if(cm <= 5){ // definir cm quando a caixa estiver pronta
+    Serial.println(cm);
+    analogWrite(motorH, 0);
+    analogWrite(motorA, 0);
+    analisaCor();
+    delay(100);
+    String cor = analisaCor();
+    pneumatica(cor);
+    delay(100);
+    analogWrite(motorH, pwm);
+    analogWrite(motorA, 0);
+    delay(1000);
+  }
 }
 
 String analisaCor(){
@@ -122,7 +128,7 @@ String pneumatica(String cor){
   } else if (cor == "Vermelho"){
     Serial.println("Atuador Vermelho");
     delay(1000);
-  }
+  } else {}
 }
 
 /* void dispCor(char cor){

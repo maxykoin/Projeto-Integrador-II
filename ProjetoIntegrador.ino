@@ -3,7 +3,7 @@
 
 int btnL = 2;
 int btnD = 3;
-int pot = A0;
+//float pot = A0;
 int motorH = 4;
 int motorA = 5;
 int pneuA; // definir
@@ -38,6 +38,7 @@ void setup(){
   pinMode(s2, OUTPUT);
   pinMode(s3, OUTPUT);
   pinMode(out, INPUT);
+  pinMode(A1, OUTPUT);
 
   estado = false;
   digitalWrite(s0, HIGH);
@@ -64,15 +65,14 @@ void ligado(){
   // lcd.setCursor(3, 0);
   // contagem de peças de cada cor
 
-  int pwm = 255;  //(analogRead(pot) / 1023) * 255;
+  int pwm = (analogRead(A0) / 4);
   int cm = ultrasonic.read();
   delay(100);
-  Serial.println(cm);
+  Serial.println(pwm);
   analogWrite(motorH, pwm);
   analogWrite(motorA, 0);
   
   if(cm <= 5){ // definir cm quando a caixa estiver pronta
-    Serial.println(cm);
     analogWrite(motorH, 0);
     analogWrite(motorA, 0);
     analisaCor();
@@ -121,14 +121,16 @@ int freqCor(int est2, int est3){
   return freqCor;
 }
 
-String pneumatica(String cor){ 
+void pneumatica(String cor){ 
   if(cor == "Azul"){
     Serial.println("Atuador Azul");
+    digitalWrite(A1, HIGH);
     delay(1000);
   } else if (cor == "Vermelho"){
     Serial.println("Atuador Vermelho");
+    digitalWrite(A1, HIGH);
     delay(1000);
-  } else {}
+  }
 }
 
 /* void dispCor(char cor){

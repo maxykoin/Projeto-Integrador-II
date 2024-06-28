@@ -1,13 +1,13 @@
 #include <Ultrasonic.h>
-#include <LiquidCrystal.h>
+#include <Wire.h> 
+#include <LiquidCrystal_I2C.h>
 
 int btnL = 2;
 int btnD = 3;
-//float pot = A0;
 int motorH = 4;
 int motorA = 5;
-int pneuA; // definir
-int pneuV; // definir
+int pneuA; // A1 
+int pneuV; // A2 
 
 int s0 = 6;
 int s1 = 7;
@@ -21,11 +21,15 @@ int contA = 0;
 int contV = 0;
 int contC = 0;
 
-// LiquidCrystal lcd(12, 11, 5, 4, 3, 2);
 Ultrasonic ultrasonic(13, 12);
+LiquidCrystal_I2C lcd(0x27,16,2);
+
 void setup(){
+  estado = false;
+
   Serial.begin(9600);
-  // lcd.begin(16, 2);
+  lcd.init();
+  lcd.backlight();
 
   pinMode(btnL, INPUT_PULLUP);
   pinMode(btnD, INPUT_PULLUP);
@@ -39,8 +43,8 @@ void setup(){
   pinMode(s3, OUTPUT);
   pinMode(out, INPUT);
   pinMode(A1, OUTPUT);
+  pinMode(A2, OUTPUT);
 
-  estado = false;
   digitalWrite(s0, HIGH);
   digitalWrite(s1, LOW);
 }
@@ -62,8 +66,24 @@ void loop(){
 }
 
 void ligado(){
-  // lcd.setCursor(3, 0);
-  // contagem de peças de cada cor
+  lcd.setCursor(0,0);
+  lcd.print("Azul|");
+  lcd.setCursor(0,1);
+  lcd.print(contA);
+
+  lcd.setCursor(5,0);
+  lcd.print("Verm.|");
+  lcd.setCursor(4,1);
+  lcd.print("|");
+  lcd.setCursor(5,1);
+  lcd.print(contV);
+
+  lcd.setCursor(11,0);
+  lcd.print("Cinza");
+  lcd.setCursor(10,1);
+  lcd.print("|");
+  lcd.setCursor(11,1);
+  lcd.print(contC);
 
   int pwm = (analogRead(A0) / 4);
   int cm = ultrasonic.read();
@@ -103,7 +123,7 @@ String analisaCor(){
     cor = "Vermelho";
   }
   Serial.println(cor);
-  // dispCor(cor);
+  dispCor(cor);
   return cor;
 }
 
@@ -133,10 +153,18 @@ void pneumatica(String cor){
   }
 }
 
-/* void dispCor(char cor){
+void dispCor(String cor){
   lcd.clear();
-  lcd.setCursor(3, 0);
-  lcd.print("Peça:");
-  lcd.setCursor(3, 1);
+  lcd.setCursor(6, 0);
+  lcd.print("Cor:");
+
+  if(cor == "Azul"){
+    lcd.setCursor(6, 1);
+  } else if(cor == "Vermelho"){
+    lcd.setCursor(4, 1);
+  } else {
+    lcd.setCursor(5, 1);
+  }
+
   lcd.print(cor);
-} */
+}

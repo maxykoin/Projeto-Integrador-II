@@ -6,8 +6,8 @@ int btnL = 2;
 int btnD = 3;
 int motorH = 4;
 int motorA = 5;
-int pneuA; // A1 
-int pneuV; // A2 
+int pneuA = 14; 
+int pneuV = 15;
 
 int s0 = 6;
 int s1 = 7;
@@ -22,7 +22,7 @@ int contV = 0;
 int contC = 0;
 
 Ultrasonic ultrasonic(13, 12);
-LiquidCrystal_I2C lcd(0x27,16,2);
+LiquidCrystal_I2C lcd(0x27,16,2); // porta 20 e 21
 
 void setup(){
   estado = false;
@@ -35,8 +35,6 @@ void setup(){
   pinMode(btnD, INPUT_PULLUP);
   pinMode(motorH, OUTPUT);
   pinMode(motorA, OUTPUT);
-  pinMode(pneuA, OUTPUT);
-  pinMode(pneuV, OUTPUT);
   pinMode(s0, OUTPUT);
   pinMode(s1, OUTPUT);
   pinMode(s2, OUTPUT);
@@ -66,6 +64,8 @@ void loop(){
 }
 
 void ligado(){
+  digitalWrite(pneuV, HIGH);
+
   lcd.setCursor(0,0);
   lcd.print("Azul|");
   lcd.setCursor(0,1);
@@ -115,13 +115,17 @@ String analisaCor(){
   if(red >=60 && red <=100 && green >=60 && green <=100 && blue < red && blue < green){
     contC++;
     cor = "Cinza";
+    digitalWrite(ledC, HIGH);
   }else if(blue < red && blue < green){
     contA++;
     cor = "Azul";
+    digitalWrite(ledA, HIGH);
   }else if (red < blue && red < green){
     contV++;
     cor = "Vermelho";
+    digitalWrite(ledV, HIGH);
   }
+  
   Serial.println(cor);
   dispCor(cor);
   return cor;
@@ -144,11 +148,11 @@ int freqCor(int est2, int est3){
 void pneumatica(String cor){ 
   if(cor == "Azul"){
     Serial.println("Atuador Azul");
-    digitalWrite(A1, HIGH);
+    digitalWrite(pneuA, HIGH);
     delay(1000);
   } else if (cor == "Vermelho"){
     Serial.println("Atuador Vermelho");
-    digitalWrite(A1, HIGH);
+    digitalWrite(pneuV, LOW);
     delay(1000);
   }
 }

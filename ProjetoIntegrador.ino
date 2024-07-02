@@ -88,7 +88,6 @@ void ligado(){
   int pwm = (analogRead(A0) / 4);
   int cm = ultrasonic.read();
   delay(100);
-  Serial.println(pwm);
   analogWrite(motorH, pwm);
   analogWrite(motorA, 0);
   
@@ -171,4 +170,6 @@ void dispCor(String cor){
   }
 
   lcd.print(cor);
+  delay(500);
+  lcd.clear();
 }

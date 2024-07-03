@@ -21,6 +21,22 @@ int contA = 0;
 int contV = 0;
 int contC = 0;
 
+int mediaR;
+int mediaB;
+int mediaG;
+
+int mediaRR;
+int mediaBR;
+int mediaGR;
+
+int mediaRG;
+int mediaBG;
+int mediaGG;
+
+int mediaRB;
+int mediaBB;
+int mediaGB;
+
 Ultrasonic ultrasonic(13, 12);
 LiquidCrystal_I2C lcd(0x27,16,2); // porta 20 e 21
 
@@ -40,11 +56,13 @@ void setup(){
   pinMode(s2, OUTPUT);
   pinMode(s3, OUTPUT);
   pinMode(out, INPUT);
-  pinMode(A1, OUTPUT);
-  pinMode(A2, OUTPUT);
+  pinMode(pneuA, OUTPUT);
+  pinMode(pneuV, OUTPUT);
 
   digitalWrite(s0, HIGH);
   digitalWrite(s1, LOW);
+
+  calibraSensor();
 }
 
 void loop(){
@@ -90,7 +108,7 @@ void ligado(){
   delay(100);
   analogWrite(motorH, pwm);
   analogWrite(motorA, 0);
-  
+  Serial.println(cm);
   if(cm <= 5){ // definir cm quando a caixa estiver pronta
     analogWrite(motorH, 0);
     analogWrite(motorA, 0);
@@ -111,18 +129,15 @@ String analisaCor(){
   int blue = freqCor(0, 1);
   int green = freqCor(1, 1);
 
-  if(red >=60 && red <=100 && green >=60 && green <=100 && blue < red && blue < green){
+  if((blue>(mediaBG-15) && blue<(mediaBG+15)) && (red>(mediaRG-15) && red<(mediaRG+15)) && (green>(mediaGG-15) && green<(mediaGG+15))){
     contC++;
     cor = "Cinza";
-    digitalWrite(ledC, HIGH);
-  }else if(blue < red && blue < green){
+  } else if((blue>(mediaBB-15) && blue<(mediaBB+15)) && (red>(mediaRB-15) && red<(mediaRB+15)) && (green >(mediaGB-15) && green<(mediaGB+15))){
     contA++;
     cor = "Azul";
-    digitalWrite(ledA, HIGH);
-  }else if (red < blue && red < green){
+  } else if ((blue>(mediaBR-15) && blue<(mediaBR+15)) && (red>(mediaRR-15) && red<(mediaRR+15)) && (green >(mediaGR-15) && green<(mediaGR+15))){
     contV++;
     cor = "Vermelho";
-    digitalWrite(ledV, HIGH);
   }
   
   Serial.println(cor);
@@ -172,4 +187,132 @@ void dispCor(String cor){
   lcd.print(cor);
   delay(500);
   lcd.clear();
+}
+
+void calibraSensor(){
+  int i;
+  int controlLoop = true;
+  int byteRead;
+  int calibrouB = true;
+  int calibrouR = true;
+  int calibrouG = true;
+  
+  Serial.write("Voce esta na funcao de calibracao do TCS230"); 
+  Serial.println();  
+  Serial.write("Digite 1 para vermelho - 2 para azul - 3 para verde - 4 para fechar a calibracao - 5 para reinicializar a calibracao");  
+  Serial.println(); 
+  delay(100);
+  
+  
+  while(controlLoop){
+   
+      if (Serial.available()){
+        byteRead = Serial.read(); //le bytwe mais recente no buffer da serial
+        Serial.write(byteRead);   //reenvia para o computador o dado recebido
+      }
+      
+      if( (byteRead == '1') && calibrouR){ 
+        calibrouR = false;
+        Serial.print("calibrando cor vermelho");
+        Serial.println();
+        
+        mediaR = mediaB = mediaG = 0;
+        for(i=0; i<20; i++){
+          int red = freqCor(0,0);
+          int blue = freqCor(0, 1);
+          int green = freqCor(1, 1);
+          mediaR +=red;
+          mediaB +=blue;
+          mediaG += green;
+          delay(50);
+        }
+       
+        mediaRR = mediaR/20;
+        mediaBR = mediaB/20;
+        mediaGR = mediaG/20;
+        Serial.print("calibracao cor vermelha finalizada");
+        Serial.println();
+        Serial.print(mediaRR),DEC;
+        Serial.println();
+        Serial.print(mediaBR,DEC);
+        Serial.println();
+        Serial.print(mediaGR,DEC);
+        Serial.println();
+        
+        Serial.write("Digite 1 para vermelho - 2 para azul - 3 para verde - 4 para fechar a calibracao - 5 para reinicializar a calibracao");  
+        Serial.println();
+      }
+      
+      if( (byteRead == '2') && calibrouB ){ 
+        calibrouB=false;
+        Serial.print("calibrando cor azul");
+        Serial.println();
+        
+        mediaR = mediaB = mediaG = 0;
+        for(i=0; i<20; i++){
+          int red = freqCor(0,0);
+          int blue = freqCor(0, 1);
+          int green = freqCor(1, 1);
+          mediaR += red;
+          mediaB += blue;
+          mediaG += green;
+          delay(50);
+        }
+       
+        mediaRB = mediaR/20;
+        mediaBB = mediaB/20;
+        mediaGB = mediaG/20;
+        Serial.print("calibracao cor azul finalizada");
+        Serial.println();
+        Serial.print(mediaRB,DEC);
+        Serial.println();
+        Serial.print(mediaBB,DEC);
+        Serial.println();
+        Serial.print(mediaGB,DEC);
+        Serial.println();
+        Serial.write("Digite 1 para vermelho - 2 para azul - 3 para verde - 4 para fechar a calibracao - 5 para reinicializar a calibracao");  
+        Serial.println();
+      }
+      
+      
+      if( (byteRead == '3') && calibrouG ){ 
+        calibrouG = false;
+        Serial.print("calibranado a cor verde");
+        Serial.println();
+        mediaR = mediaB = mediaG = 0;
+        for(i=0; i<20; i++){
+          int red = freqCor(0,0);
+          int blue = freqCor(0, 1);
+          int green = freqCor(1, 1);
+          mediaR += red;
+          mediaB += blue;
+          mediaG += green;
+          delay(50);
+        }
+       
+        mediaRG = mediaR/20;
+        mediaBG = mediaB/20;
+        mediaGG = mediaG/20;
+        Serial.print("calibracao cor verde finalizada");
+        Serial.print(mediaRG,DEC);
+        Serial.println();
+        Serial.print(mediaBG,DEC);
+        Serial.println();
+        Serial.print(mediaGG,DEC);
+        Serial.println();
+        
+        Serial.write("Digite 1 para vermelho - 2 para azul - 3 para verde - 4 para fechar a calibracao - 5 para reinicializar a calibracao");  
+        Serial.println();
+      }
+      
+      if(byteRead == '4' ){ 
+        controlLoop = false;
+      }
+      
+      if(byteRead == 'g' ){ 
+        calibrouR = true;
+        calibrouB = true;
+        calibrouG = true;
+      }
+  }
 }

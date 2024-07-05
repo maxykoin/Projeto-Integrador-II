@@ -15,6 +15,8 @@ int s2 = 8;
 int s3 = 9;
 int out = 10;
 
+int sensor = 13;
+
 bool estado;
 
 int contA = 0;
@@ -37,7 +39,6 @@ int mediaRB;
 int mediaBB;
 int mediaGB;
 
-Ultrasonic ultrasonic(13, 12);
 LiquidCrystal_I2C lcd(0x27,16,2); // porta 20 e 21
 
 void setup(){
@@ -58,6 +59,7 @@ void setup(){
   pinMode(out, INPUT);
   pinMode(pneuA, OUTPUT);
   pinMode(pneuV, OUTPUT);
+  pinMode(sensor, INPUT);
 
   digitalWrite(s0, HIGH);
   digitalWrite(s1, LOW);
@@ -104,12 +106,11 @@ void ligado(){
   lcd.print(contC);
 
   int pwm = (analogRead(A0) / 4);
-  int cm = ultrasonic.read();
   delay(100);
   analogWrite(motorH, pwm);
   analogWrite(motorA, 0);
-  Serial.println(cm);
-  if(cm <= 5){ // definir cm quando a caixa estiver pronta
+
+  if(digitalRead(sensor) == HIGH){
     analogWrite(motorH, 0);
     analogWrite(motorA, 0);
     analisaCor();

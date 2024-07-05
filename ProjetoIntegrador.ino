@@ -1,4 +1,3 @@
-#include <Ultrasonic.h>
 #include <Wire.h> 
 #include <LiquidCrystal_I2C.h>
 
@@ -78,6 +77,10 @@ void loop(){
   while(estado == true){
     ligado();
     if (digitalRead(btnD) == LOW){
+      lcd.clear();
+      contA = 0;
+      contV = 0;
+      contC = 0;
       estado = false;
     }
   }
@@ -107,38 +110,44 @@ void ligado(){
 
   int pwm = (analogRead(A0) / 4);
   delay(100);
-  analogWrite(motorH, pwm);
-  analogWrite(motorA, 0);
+  analogWrite(motorH, 255);
+  digitalWrite(motorA, LOW);
 
-  if(digitalRead(sensor) == HIGH){
-    analogWrite(motorH, 0);
-    analogWrite(motorA, 0);
+  if(digitalRead(sensor) == LOW){
+    digitalWrite(motorH, LOW);
+    digitalWrite(motorA, LOW);
     analisaCor();
-    delay(100);
+    delay(1000);
     String cor = analisaCor();
     pneumatica(cor);
     delay(100);
-    analogWrite(motorH, pwm);
-    analogWrite(motorA, 0);
-    delay(1000);
+    analogWrite(motorH, 255);
+    digitalWrite(motorA, LOW);
+    delay(6000);
   }
+  Serial.println(digitalRead(btnD));
 }
 
 String analisaCor(){
-  String cor;
+  String cor = "";
   int red = freqCor(0,0);
   int blue = freqCor(0, 1);
   int green = freqCor(1, 1);
-
-  if((blue>(mediaBG-15) && blue<(mediaBG+15)) && (red>(mediaRG-15) && red<(mediaRG+15)) && (green>(mediaGG-15) && green<(mediaGG+15))){
-    contC++;
-    cor = "Cinza";
-  } else if((blue>(mediaBB-15) && blue<(mediaBB+15)) && (red>(mediaRB-15) && red<(mediaRB+15)) && (green >(mediaGB-15) && green<(mediaGB+15))){
-    contA++;
-    cor = "Azul";
-  } else if ((blue>(mediaBR-15) && blue<(mediaBR+15)) && (red>(mediaRR-15) && red<(mediaRR+15)) && (green >(mediaGR-15) && green<(mediaGR+15))){
-    contV++;
-    cor = "Vermelho";
+  
+  while(cor == ""){
+    Serial.println(cor);
+    if((blue>(mediaBG-15) && blue<(mediaBG+15)) && (red>(mediaRG-15) && red<(mediaRG+15)) && (green>(mediaGG-15) && green<(mediaGG+15))){
+      contC++;
+      cor = "Cinza";
+    } else if((blue>(mediaBB-15) && blue<(mediaBB+15)) && (red>(mediaRB-15) && red<(mediaRB+15)) && (green >(mediaGB-15) && green<(mediaGB+15))){
+      contA++;
+      cor = "Azul";
+    } else if ((blue>(mediaBR-15) && blue<(mediaBR+15)) && (red>(mediaRR-15) && red<(mediaRR+15)) && (green >(mediaGR-15) && green<(mediaGR+15))){
+      contV++;
+      cor = "Vermelho";
+    } else {
+      cor = "";
+    }
   }
   
   Serial.println(cor);
@@ -168,7 +177,7 @@ void pneumatica(String cor){
   } else if (cor == "Vermelho"){
     Serial.println("Atuador Vermelho");
     digitalWrite(pneuV, LOW);
-    delay(1000);
+    delay(6000);
   }
 }
 
